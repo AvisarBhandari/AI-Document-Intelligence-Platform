@@ -25,3 +25,14 @@ class UserRegisterSuccessResponse(BaseModel):
     status: str = "success"
     message: str = "User registered successfully"
     data: UserResponse # This embeds existing user response fields
+
+# for login and register
+class UserLogin(BaseModel):
+    email:EmailStr
+    password: str
+
+class TokenResponse(BaseModel):
+    status: str = "success"
+    message: str = "Login successfull" 
+    access_token: str
+    token_type: str = "bearer"
