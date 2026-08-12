@@ -12,7 +12,7 @@ from app.repositories.user_repositorie import UserRepository
 from app.models.user import User
 
 # Matchs router path for the OAuth2 configuration bluprint
-oauth2_schema = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
+oauth2_schema = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 class JWTManager:
     @staticmethod
