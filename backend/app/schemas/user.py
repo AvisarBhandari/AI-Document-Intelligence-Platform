@@ -5,10 +5,16 @@ from datetime import datetime
 # shared fields across schemas 
 class UserBase(BaseModel):
     email:EmailStr
-    username: str
+    username: str = Field(
+        min_length=3,
+        max_length=100
+    )
 # Schema used for user registration input
 class UserCreate(UserBase):
-    password: str
+    password: str = Field(
+        min_length=8,
+        max_length=128
+    )
 # Schema used for API responses
 class UserResponse(UserBase):
     id: uuid.UUID
@@ -33,6 +39,6 @@ class UserLogin(BaseModel):
 
 class TokenResponse(BaseModel):
     status: str = "success"
-    message: str = "Login successfull" 
+    message: str = "Login successful" 
     access_token: str
     token_type: str = "bearer"

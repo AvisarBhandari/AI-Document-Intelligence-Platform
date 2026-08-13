@@ -1,15 +1,14 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from pydantic_core import ValidationError
 
 from app.core.database import get_db
 from app.schemas.user import (
     UserCreate, UserRegisterSuccessResponse,
-    UserLogin, TokenResponse, UserResponse
+    UserLogin, TokenResponse
     )
 from app.services.auth_services import AuthService
-from app.dependencies.auth import get_current_user
-from app.models.user import User
 
 router = APIRouter()
 
@@ -31,6 +30,3 @@ async def register(user_data: UserCreate, db:Session = Depends(get_db)):
         "data": new_user
     }
 
-@router.get("/users/me", response_model=UserResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
-    return current_user

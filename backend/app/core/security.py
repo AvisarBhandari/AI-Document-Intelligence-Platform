@@ -4,7 +4,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class SecurityUtils:
     @staticmethod
-    def has_password(password: str) -> str:
+    def hash_password(password: str) -> str:
         return pwd_context.hash(password)
 
     @staticmethod

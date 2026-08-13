@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.repositories.user_repositorie import UserRepository
+from app.repositories.user_repository import UserRepository
 from app.models.user import User
 
 # Matchs router path for the OAuth2 configuration bluprint
@@ -26,7 +26,7 @@ def get_current_user( token: Annotated[str, Depends(oauth2_schema)],db: Session 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not Validate credentials",
-        headers={"www-Authenticate": "Bearer"},
+        headers={"WWW-Authenticate": "Bearer"},
     )
     try:
         payload = jwt.decode(token, settings.JWT_SECRET_KEY,algorithms=[settings.JWT_ALGORITHM])
