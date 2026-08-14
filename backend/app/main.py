@@ -5,6 +5,8 @@ from app.api.v1.router import api_v1_router
 from app.core.database import Base, engine
 from app.models.user import User
 
+from app.core.exceptions import setup_exception_handlers
+
 # to create SQLAlchemy to create all missing table in the database
 Base.metadata.create_all(bind= engine)
 app = FastAPI(
@@ -19,7 +21,7 @@ app.add_middleware(
 )
 
 app.include_router(api_v1_router, prefix="/api/v1")
-
+setup_exception_handlers(app)
 @app.get("/")
 async def root():
     return {"status": "healthy", "service": "RAG Document Intelligence Backend"}
