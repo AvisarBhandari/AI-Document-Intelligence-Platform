@@ -2,9 +2,9 @@ name: Backend Integration Tests
 
 on:
   push:
-    branches: [ main, master, develop]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main, master, develop]
+    branches: [ main, master, develop ]
 
 jobs:
   pytest-backend:
@@ -23,14 +23,14 @@ jobs:
         python-version: '3.14.4'
         cache: 'pip'
         cache-dependency-path: 'backend/requirements.txt'
-
+      
     - name: Install System and Python Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest httpx httpx2 pydantic fastapi sqlalchemy PyJWT email-validator
+        # FIXED: Added python-dotenv to prevent ModuleNotFoundError
+        pip install pytest httpx httpx2 pydantic fastapi sqlalchemy PyJWT email-validator python-dotenv
     
     - name: Create Inline Environment Configuration
-      # Injects a secure 32-byte signing key for testing to clear JWT warnings
       run: |
         echo "JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')" >> $GITHUB_ENV
 
