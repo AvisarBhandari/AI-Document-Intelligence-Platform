@@ -18,12 +18,12 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Set up Python Runtime
-      uses: actions/setup-python@4
+      uses: actions/setup-python@v5
       with:
-        python-version: '13.12'
+        python-version: '3.14.4'
         cache: 'pip'
       
-    - name: Install System and Pyhton Dependencies
+    - name: Install System and Python Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pytest httpx httpx2 pydantic fastapi sqlalchemy PyJWT email-validator
