@@ -1,0 +1,38 @@
+name: Backend Integration Tests
+
+on:
+  push:
+    branches: [ main, master, develop]
+  pull_request:
+    branches: [ main, master, develop]
+
+jobs:
+  pytest-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+      
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python Runtime
+      uses: actions/setup-python@5
+      with:
+        python-version: '13.14.4'
+        cache: 'pip'
+      
+    - name: Install System and Pyhton Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest httpx httpx2 pydantic fastapi sqlalchemy PyJWT email-validator
+    
+    - name: Create Inline Environment Configuration
+      # Injects a secure 32-byte signing key for testing to clear JWT warnings
+      run: |
+        echo "JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')" >> $GITHUB_ENV
+
+    - name: Execute Test Cases
+      run: |
+        python -m pytest test/test_auth.py -v

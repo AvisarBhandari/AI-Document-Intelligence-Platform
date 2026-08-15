@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 import uuid
 from datetime import datetime
 
@@ -24,8 +24,7 @@ class UserResponse(UserBase):
     updated_at: datetime
     profile_picture: str | None = None
 
-    class Config:
-        from_attributes = True # Allows Pydantic to read SQLAlchemy models
+    model_config = ConfigDict(from_attributes=True) # Allows Pydantic to read SQLAlchemy models
 
 class UserRegisterSuccessResponse(BaseModel):
     status: str = "success"
