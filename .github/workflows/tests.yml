@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend/requirements.txt
+        working-directory: backend
       
     steps:
     - name: Checkout Code Repository
@@ -22,7 +22,8 @@ jobs:
       with:
         python-version: '3.14.4'
         cache: 'pip'
-      
+        cache-dependency-path: 'backend/requirements.txt'
+
     - name: Install System and Python Dependencies
       run: |
         python -m pip install --upgrade pip
