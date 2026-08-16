@@ -27,13 +27,11 @@ jobs:
     - name: Install System and Python Dependencies
       run: |
         python -m pip install --upgrade pip
-        # FIXED: Added python-dotenv to prevent ModuleNotFoundError
         pip install pytest httpx httpx2 pydantic fastapi sqlalchemy PyJWT email-validator python-dotenv
     
-    - name: Create Inline Environment Configuration
+    - name: Execute Test Suite with Environment Variables
+      env:
+        DATABASE_URL: "sqlite:///./test.db" 
       run: |
         echo "JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')" >> $GITHUB_ENV
-
-    - name: Execute Test Cases
-      run: |
         python -m pytest test/test_auth.py -v
