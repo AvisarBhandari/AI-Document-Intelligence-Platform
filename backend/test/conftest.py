@@ -12,7 +12,7 @@ def test_db_engine():
     """Creates the structural schema fields once per testing suite session."""
     engine = create_engine(
         TEST_DATABASE_URL,
-        connect_args=("check_same_thread":False)
+        connect_args={"check_same_thread":False}
     )
     # Generateing table from SQLAlchemy Base methadata
     Base.metadata.create_all(bind=engine)
