@@ -32,9 +32,9 @@ jobs:
 
       - name: Execute Test Cases
         env:
-          DATABASE_URL: "sqlite:///./test.db"
+          URL_DATABASE: "sqlite:///./test.db"
           JWT_SECRET_KEY: "test-secret-key-for-ci"
         run: |
-          echo "DATABASE_URL=$DATABASE_URL"
-          python -c "import os; print('Python sees DATABASE_URL:', os.getenv('DATABASE_URL'))"
+          echo "URL_DATABASE=$URL_DATABASE"
+          python -c "import os; print('Python sees URL_DATABASE:', os.getenv('URL_DATABASE'))"
           python -m pytest test/test_auth.py -v
