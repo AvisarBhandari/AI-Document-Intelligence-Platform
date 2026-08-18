@@ -5,7 +5,7 @@ load_dotenv()
 
 class Settings():
     PROJECT_NAME: str = "AI Document Intelligence Platform"
-    DATABASE_URL: str = os.getenv("URL_DATABASE")
+    DATABASE_URL: str = os.getenv("DATABASE_URL") or os.getenv("URL_DATABASE")
 
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY")
     JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
