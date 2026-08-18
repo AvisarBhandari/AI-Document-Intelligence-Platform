@@ -29,9 +29,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest httpx httpx2 pydantic fastapi sqlalchemy PyJWT email-validator python-dotenv
     
-    - name: Execute Test Suite with Environment Variables
+    - name: Execute Test Cases
       env:
-        DATABASE_URL: "sqlite:///./test.db" 
+        DATABASE_URL: "sqlite:///./test.db"
       run: |
-        echo "JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')" >> $GITHUB_ENV
+        # FIXED: Inlined the dynamic JWT secret generation into the active test execution step
+        export JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_hex(32))')
         python -m pytest test/test_auth.py -v
