@@ -1,9 +1,12 @@
+
 from sqlalchemy import Boolean, String, DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
+
+# from app.models.documents import Document
 
 class User(Base):
     __tablename__ = 'users'
@@ -12,6 +15,10 @@ class User(Base):
         primary_key=True,
         default=uuid.uuid4
     )
+#     documents: Mapped[list["Document"]] = relationship(
+#     back_populates="user",
+#     cascade="all, delete-orphan"
+# )   
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(String(100), index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
