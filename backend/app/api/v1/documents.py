@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from requests import Session
 from app.dependencies.auth import get_current_user
-from backend.app.core.database import get_db
+from app.core.database import get_db
 
 
 router = APIRouter()

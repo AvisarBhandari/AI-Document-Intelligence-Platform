@@ -1,5 +1,7 @@
 from logging.config import fileConfig
+import os
 
+from dotenv import load_dotenv
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -7,7 +9,9 @@ from app.core.database import Base
 from app.models.user import User
 from app.models.document import Document
 
+from alembic import context
 
+load_dotenv()
 from alembic import context
 
 # this is the Alembic Config object, which provides
@@ -62,8 +66,12 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    database_url = os.getenv("URL_DATABASE")
+
+    if not database_url:
+        raise RuntimeError("URL_DATABASE is not set")
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        {"sqlalchemy.url": database_url},
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
