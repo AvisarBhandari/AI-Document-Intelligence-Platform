@@ -1,21 +1,25 @@
 import uuid
-from sqlalchemy.orm import Session
+
 from app.models.user import User
 from app.schemas.user import UserCreate
+from sqlalchemy.orm import Session
+
+
 class UserRepository:
     @staticmethod
-    def get_user_by_email(db:Session, email:str) -> User | None:
+    def get_user_by_email(db: Session, email: str) -> User | None:
         return db.query(User).filter(User.email == email).first()
+
     @staticmethod
-    def get_user_by_id(db:Session, id: uuid.UUID) -> User | None:
+    def get_user_by_id(db: Session, id: uuid.UUID) -> User | None:
         return db.query(User).filter(User.id == id).first()
 
     @staticmethod
     def create_user(db: Session, user_data: UserCreate, hashed_pass: str) -> User:
         db_user = User(
-            email = user_data.email,
-            username = user_data.username,
-            hashed_password = hashed_pass
+            email=user_data.email,
+            username=user_data.username,
+            hashed_password=hashed_pass,
         )
         db.add(db_user)
         db.commit()
