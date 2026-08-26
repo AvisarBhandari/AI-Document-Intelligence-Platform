@@ -1,13 +1,68 @@
+import os
+import uuid
+
+from fastapi import APIRouter, Depends, File, UploadFile, status
+from sqlalchemy.orm import Session
+
+
 from app.core.database import get_db
 from app.dependencies.auth import get_current_user
-from fastapi import APIRouter, Depends
-from requests import Session
+from app.models.user import User
+from app.services.document_service import DocumentService
+from app.schemas.document import DocumentUploadResponse
 
 router = APIRouter()
 
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.post("/upload", status_code=202)
+
+@router.post("/upload", status_code=status.HTTP_201_CREATED)
 async def upload_document(
-    current_user=Depends(get_current_user), db: Session = Depends(get_db)
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    response_model=DocumentUploadResponse
 ):
-    return ("Upload", "TEST")
+    # Read the uploaded file 
+    file_cuntent = await file.read()
+
+    # Get file size in bytes
+    file_size = len(file_cuntent)
+
+    # Validate the uploaded file
+    DocumentService.validate_file(
+        file_type=file.content_type,
+        file_size=file_size,
+    )
+
+    # Generate unique filename
+    file_extension = os.path.splitext(file.filename)[1]
+
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+
+    file_path = os.path.join(
+        UPLOAD_DIR,
+        unique_filename
+    )
+
+    # Save the file 
+    with open(file_path, "wb") as buffer:
+        buffer.write(file_cuntent)
+
+    # Create database record
+    document = DocumentService.create_document(
+        db= db,
+        user_id= current_user.id,
+        filename= unique_filename,
+        original_filename= file.filename,
+        file_path= file_path,
+        file_type= file.content_type,
+        file_size= file_size,
+    )
+
+    return {
+        "status": "success",
+        "message": "Document uploaded successfull",
+        "data": document,
+    }    
