@@ -28,3 +28,14 @@ class DocumentRepository:
         db.commit()
         db.refresh(document)
         return document
+
+    @staticmethod
+    def get_documents_by_user(
+        db: Session,
+        user_id: uuid.UUID,
+    ) -> list[Document]:
+        return (
+            db.query(Document)
+            .filter(Document.user_id == user_id)
+            .all()
+        )

@@ -1,6 +1,7 @@
 import uuid
 
 from app.repositories.document_repository import DocumentRepository
+from app.models.document import Document
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -64,3 +65,15 @@ class DocumentService:
         )
 
         return document
+
+    @staticmethod
+    def get_user_documents(
+        db: Session,
+        user_id: uuid.UUID
+    ) -> list[Document]:
+        documents = DocumentRepository.get_documents_by_user(
+            db=db,
+            user_id=user_id
+        )
+
+        return documents
