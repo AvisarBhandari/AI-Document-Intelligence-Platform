@@ -23,3 +23,10 @@ class DocumentUploadResponse(BaseModel):
     status: str = "success"
     message: str
     data: DocumentResponse
+
+
+
+class DocumentListResponse(BaseModel):
+    status: str = "success"
+    message: str
+    data: list[DocumentResponse]

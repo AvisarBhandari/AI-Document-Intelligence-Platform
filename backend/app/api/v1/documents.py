@@ -9,7 +9,7 @@ from app.core.database import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.services.document_service import DocumentService
-from app.schemas.document import DocumentUploadResponse
+from app.schemas.document import (DocumentUploadResponse, DocumentListResponse)
 
 router = APIRouter()
 
@@ -66,3 +66,19 @@ async def upload_document(
         "message": "Document uploaded successfull",
         "data": document,
     }    
+
+
+@router.get("", response_model=DocumentListResponse)
+async def get_user_documents(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    documents = DocumentService.get_user_documents(
+        db = db,
+        user_id = current_user.id
+    )
+    return {
+        "status": "success",
+        "message": "Documents retrieved successfully",
+        "data": documents,
+    }
