@@ -77,3 +77,21 @@ class DocumentService:
         )
 
         return documents
+
+    @staticmethod
+    def get_document_by_id(
+        db: Session,
+        document_id: uuid.UUID,
+        user_id: uuid.UUID
+    ) -> Document:
+        document = DocumentRepository.get_document_by_id(
+            db=db,
+            document_id=document_id,
+            user_id=user_id
+        )
+        if not document:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found"
+            )
+        return document

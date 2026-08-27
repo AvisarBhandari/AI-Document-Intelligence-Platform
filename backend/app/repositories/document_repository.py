@@ -39,3 +39,18 @@ class DocumentRepository:
             .filter(Document.user_id == user_id)
             .all()
         )
+
+    @staticmethod
+    def get_document_by_id(
+        db: Session,
+        document_id: uuid.UUID,
+        user_id: uuid.UUID,
+    ) -> Document | None:
+        return (
+            db.query(Document)
+            .filter(
+                Document.id == document_id,
+                Document.user_id == user_id
+            )
+            .first()
+        )
