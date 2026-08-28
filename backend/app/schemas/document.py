@@ -30,3 +30,5 @@ class DocumentListResponse(BaseModel):
     status: str = "success"
     message: str
     data: list[DocumentResponse]
+
+
