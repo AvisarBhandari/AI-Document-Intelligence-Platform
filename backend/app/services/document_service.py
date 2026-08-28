@@ -1,4 +1,5 @@
 import uuid
+import os
 
 from app.repositories.document_repository import DocumentRepository
 from app.models.document import Document
@@ -95,3 +96,35 @@ class DocumentService:
                 detail="Document not found"
             )
         return document
+    @staticmethod
+    def delete_document(
+        db: Session,
+        document_id: uuid.UUID,
+        user_id: uuid.UUID
+    ) -> Document:
+
+        # First first the document and verify ownership
+        document = DocumentRepository.get_document_by_id(
+            db=db,
+            document_id=document_id,
+            user_id=user_id
+        )
+
+        if not document:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Document not found"
+            )
+
+        # Delete the database record
+        delete_document = DocumentRepository.delete_document(
+            db=db,
+            document_id=document_id,
+            user_id=user_id
+        )
+
+        # Delete the physical file 
+        if os.path.exists(document.file_path):
+            os.remove(document.file_path)
+
+        return delete_document

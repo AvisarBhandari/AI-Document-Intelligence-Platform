@@ -1,3 +1,4 @@
+from pydoc import Doc
 import uuid
 
 from app.models.document import Document
@@ -54,3 +55,25 @@ class DocumentRepository:
             )
             .first()
         )
+
+    @staticmethod
+    def delete_document(
+        db: Session,
+        document_id: uuid.UUID,
+        user_id: uuid.UUID
+    ) -> Document | None:
+        document = (
+            db.query(Document)
+            .filter(
+                Document.id == document_id,
+                Document.user_id == user_id
+            )
+            first()
+        )
+        if not document:
+            return None
+        db.delete(document)
+        db.commit()
+
+        return document
+
