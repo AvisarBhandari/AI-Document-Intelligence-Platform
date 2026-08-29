@@ -1,7 +1,9 @@
+from email import message
 import os
 import uuid
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from annotated_types import DocInfo
+from fastapi import APIRouter, Depends, File, UploadFile, routing, status
 from sqlalchemy.orm import Session
 
 
@@ -100,3 +102,23 @@ async def get_document(
         user_id=current_user.id
     )
     return document
+
+
+@router.delete(
+    "/{document_id}"
+
+)
+async def delete_document(
+    document_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    DocumentService.delete_document(
+        db=db,
+        document_id=document_id,
+        user_id=current_user.id
+    )
+    return {
+        "status": "success",
+        "message": "Document deleted successfully"
+    }

@@ -68,7 +68,7 @@ class DocumentRepository:
                 Document.id == document_id,
                 Document.user_id == user_id
             )
-            first()
+            .first()
         )
         if not document:
             return None
