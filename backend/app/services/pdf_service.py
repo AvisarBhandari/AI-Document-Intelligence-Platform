@@ -26,7 +26,70 @@ class PDFService:
             })
 
         return pages
+    @staticmethod
+    def calculate_quality_score(page: dict) -> float:
+        character_count = page["character_count"]
+        word_count = page["word_count"]
+        garbage_score = page["garbage_score"]
 
+        # Text amount score
+        if character_count == 0:
+            text_amount_score = 0.0
+        elif character_count < 100:
+            text_amount_score = 0.3
+        elif character_count < 500:
+            text_amount_score = 0.6
+        elif character_count < 1000:
+            text_amount_score = 0.8
+        else:
+            text_amount_score = 1.0
+
+        # Word quality score
+        if word_count == 0:
+            word_score = 0.0
+        elif word_count < 10:
+            word_score = 0.3
+        elif word_count < 50:
+            word_score = 0.6
+        elif word_count < 100:
+            word_score = 0.8
+        else:
+            word_score = 1.0
+
+        # Character quality score
+        if character_count == 0:
+            character_score = 0.0
+        else:
+            text = page["text"]
+
+            normal_characters = sum(
+                1 for char in text
+                if char.isalnum() or char.isspace()
+            )
+
+            normal_character_ratio = (
+                normal_characters / character_count
+            )
+
+            character_score = min(
+                max(normal_character_ratio, 0.0),
+                1.0
+            )
+
+        # Garbage score
+        garbage_quality_score = 1.0 - garbage_score
+
+        # Final weighted score
+        quality_score = (
+            (text_amount_score * 0.30)
+            + (word_score * 0.20)
+            + (character_score * 0.20)
+            + (garbage_quality_score * 0.30)
+        )
+
+        return round(quality_score, 2)
+
+    
     @staticmethod
     def detect_garbage_text(text: str) -> dict:
         if not text.strip():
@@ -92,34 +155,39 @@ class PDFService:
 
     @staticmethod
     def analyze_page_quality(page: dict) -> dict:
-        text = page["text"]
-
         character_count = page["character_count"]
         word_count = page["word_count"]
 
-        garbage_result = PDFService.detect_garbage_text(text)
+        garbage_result = PDFService.detect_garbage_text(
+            page["text"]
+        )
 
-        if character_count == 0:
-            quality = "bad"
-
-        elif garbage_result["is_garbage"]:
-            quality = "garbage"
-
-        elif character_count < 50 or word_count < 10:
-            quality = "poor"
-
-        else:
-            quality = "good"
-
-        return {
+        updated_page = {
             **page,
-            "quality": quality,
             "garbage_score": garbage_result["garbage_score"],
             "garbage_reason": garbage_result["reason"],
             "is_garbage": garbage_result["is_garbage"]
         }
 
-    
+        quality_score = PDFService.calculate_quality_score(
+            updated_page
+        )
+
+        if quality_score >= 0.75:
+            quality = "good"
+
+        elif quality_score >= 0.45:
+            quality = "poor"
+
+        else:
+            quality = "bad"
+
+        return {
+            **updated_page,
+            "quality_score": quality_score,
+            "quality": quality,
+        }
+        
     @staticmethod
     def analyze_pdf(pdf_path: str) -> list[dict]:
         pages = PDFService.extract_pages(pdf_path)
