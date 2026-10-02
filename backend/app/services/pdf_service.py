@@ -3,6 +3,10 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+from services.pdfplumber_service import PDFPlumberService
+from services.document_decision_service import DocumentDecisionService
+from services.ocr_service import OCRService
+
 class PDFService:
     @staticmethod
     def extract_pages(pdf_path: str) -> list[dict]:
@@ -190,13 +194,92 @@ class PDFService:
         
     @staticmethod
     def analyze_pdf(pdf_path: str) -> list[dict]:
+
         pages = PDFService.extract_pages(pdf_path)
 
         analyzed_pages = []
 
         for page in pages:
-            analyzed_page = PDFService.analyze_page_quality(page)
-            analyzed_pages.append(analyzed_page)
 
+            analyzed_page = PDFService.analyze_page_quality(
+                page
+            )
+            analyzed_page["extractor"] = "pypdf"
+            best_page = PDFService.choose_best_extraction(
+                analyzed_page,
+                pdf_path
+            )
+            decision = DocumentDecisionService.decide(
+                best_page
+            )
+
+            best_page.update(decision)
+            analyzed_pages.append(best_page)
         return analyzed_pages
 
+    
+    @staticmethod
+    def choose_best_extraction(
+    pypdf_page: dict,
+    pdf_path: str
+) -> dict:
+
+        candidates = [pypdf_page]
+        # Try pdfplumber only when pypdf isn't good enough
+        if pypdf_page["quality_score"] < 0.75:
+
+            alternative_text = PDFPlumberService.extract_page(
+                pdf_path,
+                pypdf_page["page_number"]
+            )
+
+            alternative_page = {
+                **pypdf_page,
+                "text": alternative_text,
+                "character_count": len(alternative_text),
+                "word_count": len(alternative_text.split()),
+            }
+
+            alternative_page = PDFService.analyze_page_quality(
+                alternative_page
+            )
+
+            alternative_page["extractor"] = "pdfplumber"
+
+            candidates.append(alternative_page)
+
+        # Find the best result so far
+        best_page = max(
+            candidates,
+            key=lambda page: page["quality_score"]
+        )
+        # If still poor, try OCR
+        if best_page["quality_score"] < 0.75:
+
+            ocr_text = OCRService.extract_page(
+                pdf_path,
+                pypdf_page["page_number"]
+            )
+
+            ocr_page = {
+                **pypdf_page,
+                "text": ocr_text,
+                "character_count": len(ocr_text),
+                "word_count": len(ocr_text.split()),
+            }
+
+            ocr_page = PDFService.analyze_page_quality(
+                ocr_page
+            )
+
+            ocr_page["extractor"] = "ocr"
+
+            candidates.append(ocr_page)
+
+        # Choose the best extraction
+        best_page = max(
+            candidates,
+            key=lambda page: page["quality_score"]
+        )
+
+        return best_page

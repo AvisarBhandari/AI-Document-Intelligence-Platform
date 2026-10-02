@@ -3,3 +3,5 @@
 *__pycache__
 *.vscode
 *uploads
+*test
+*test_pdf_extraction.py
