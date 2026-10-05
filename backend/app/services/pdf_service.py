@@ -220,12 +220,15 @@ class PDFService:
     
     @staticmethod
     def choose_best_extraction(
-    pypdf_page: dict,
-    pdf_path: str
-) -> dict:
+        pypdf_page: dict,
+        pdf_path: str
+    ) -> dict:
 
         candidates = [pypdf_page]
-        # Try pdfplumber only when pypdf isn't good enough
+
+        
+        # 1. Try pdfplumber if pypdf is questionable
+        
         if pypdf_page["quality_score"] < 0.75:
 
             alternative_text = PDFPlumberService.extract_page(
@@ -238,6 +241,7 @@ class PDFService:
                 "text": alternative_text,
                 "character_count": len(alternative_text),
                 "word_count": len(alternative_text.split()),
+                "extractor": "pdfplumber",
             }
 
             alternative_page = PDFService.analyze_page_quality(
@@ -248,12 +252,17 @@ class PDFService:
 
             candidates.append(alternative_page)
 
-        # Find the best result so far
+        
+        # 2. Check best result so far
+        
         best_page = max(
             candidates,
             key=lambda page: page["quality_score"]
         )
-        # If still poor, try OCR
+
+        
+        # 3. Try OCR if still questionable
+        
         if best_page["quality_score"] < 0.75:
 
             ocr_text = OCRService.extract_page(
@@ -266,6 +275,7 @@ class PDFService:
                 "text": ocr_text,
                 "character_count": len(ocr_text),
                 "word_count": len(ocr_text.split()),
+                "extractor": "ocr",
             }
 
             ocr_page = PDFService.analyze_page_quality(
@@ -276,10 +286,26 @@ class PDFService:
 
             candidates.append(ocr_page)
 
-        # Choose the best extraction
+        
+        # 4. Record scores from every candidate
+        
+        candidate_scores = {}
+
+        for candidate in candidates:
+            candidate_scores[
+                candidate["extractor"]
+            ] = candidate["quality_score"]
+
+        
+        # 5. Choose the best extraction
+        
         best_page = max(
             candidates,
             key=lambda page: page["quality_score"]
         )
 
+        # Store candidate scores in final result
+        best_page["candidate_scores"] = candidate_scores
+
         return best_page
+        
